@@ -1,5 +1,6 @@
 using API.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -14,25 +15,31 @@ builder.Services.AddDbContext<DataContext>(opt => {
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options => {
+    options.AddPolicy("Cors 4200", builder => {
+        builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+    });
+});
 
 WebApplication app = builder.Build();
+
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI(c => {
         c.SwaggerEndpoint("swagger/v1/swagger.json", "API V1");
         c.RoutePrefix = string.Empty;
     });
-}
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+    app.MapOpenApi(); // Configure the HTTP request pipeline.
 }
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("Cors 4200");
 
 app.MapControllers();
 
