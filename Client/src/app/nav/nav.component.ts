@@ -3,30 +3,33 @@ import { FormsModule } from '@angular/forms';
 import { AccountService } from '../_services/account.service';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-nav',
   standalone: true,
-  imports: [RouterModule, FormsModule, BsDropdownModule],
+  imports: [RouterModule, FormsModule, BsDropdownModule, TitleCasePipe],
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.css']
 })
 export class NavComponent {
   accountService: AccountService = inject(AccountService);
+  private router = inject(Router);
+  private toastr = inject(ToastrService);
   model: any = {}
 
   login() {
     this.accountService.login(this.model).subscribe({
       next: (response: any) => {
-        console.log(response);
-        //this.router.navigateByUrl('/members');
+        this.router.navigateByUrl('/members');
       },
-      error: (err: any) => {console.log(err); }
+      error: (err: any) => { this.toastr.error(err); }
     })
   }
 
   logout() {
     this.accountService.logout();
-    //this.router.navigateByUrl('/');
+    this.router.navigateByUrl('/');
   }
 }
