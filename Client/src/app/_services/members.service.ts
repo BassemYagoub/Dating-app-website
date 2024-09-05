@@ -1,5 +1,5 @@
 import { UserParams } from './../_models/userParams';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, WritableSignal, inject, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Member } from '../_models/member';
@@ -8,6 +8,7 @@ import { Photo } from '../_models/photo';
 import { PaginatedResult } from '../_models/pagination';
 import { AccountService } from './account.service';
 import { User } from '../_models/user';
+import { setPaginatedResponse, setPaginationHeaders } from './paginationHelper';
 
 @Injectable({
   providedIn: 'root'
@@ -30,10 +31,10 @@ export class MembersService {
     const response = this.memberCache.get(Object.values(this.userParams()).join('-'));
 
     if(response){
-      return this.setPaginatedResponse(response);
+      return setPaginatedResponse(response, this.paginatedResult);
     }
 
-    let params = this.setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
+    let params = setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
 
     params = params.append("minAge", this.userParams().minAge);
     params = params.append("maxAge", this.userParams().maxAge);
@@ -42,28 +43,10 @@ export class MembersService {
     
     return this.http.get<Member[]>(this.baseUrl + 'users', {observe: 'response', params}).subscribe({
       next: response => {
-        this.setPaginatedResponse(response);
+        setPaginatedResponse(response, this.paginatedResult);
         this.memberCache.set(Object.values(this.userParams()).join('-'), response);
       }
     });
-  }
-
-  private setPaginationHeaders(pageNumber: number, pageSize: number): HttpParams {
-    let params = new HttpParams();
-
-    if (pageNumber && pageSize) {
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-
-    return params;
-  }
-
-  private setPaginatedResponse(response: HttpResponse<Member[]>): void {
-    this.paginatedResult.set({
-      items: response.body as Member[],
-      pagination: JSON.parse(response.headers.get('Pagination')!)
-    })
   }
   
   getMember(username: string): Observable<Member> {
