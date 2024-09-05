@@ -35,6 +35,7 @@ namespace API.Controllers {
             UserDTO userDto = new UserDTO {
                 Username = user.UserName,
                 KnownAs = user.KnownAs,
+                Gender = user.Gender,
                 Token = tokenService.CreateToken(user)
             };
 
@@ -58,11 +59,12 @@ namespace API.Controllers {
                     return Unauthorized("Invalid Password");
                 }
             }
-
+               
             UserDTO userDto = new UserDTO {
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
                 KnownAs = user.KnownAs,
+                Gender = user.Gender,
                 PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
             };
 
