@@ -4,6 +4,7 @@ using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace API.Controllers {
 
-    public class AccountController(DataContext context, 
+    public class AccountController(UserManager<AppUser> userManager, 
         ITokenService tokenService,
         IMapper mapper
         ) : BaseApiController {
@@ -22,15 +23,13 @@ namespace API.Controllers {
                 return BadRequest("Username is taken");
             }
 
-            using HMACSHA512 hmac = new HMACSHA512();
-
             AppUser user = mapper.Map<AppUser>(registerDTO);
             user.UserName = registerDTO.Username.ToLower();
-            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password));
-            user.PasswordSalt = hmac.Key;
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+            var result = await userManager.CreateAsync(user, registerDTO.Password);
+            if (!result.Succeeded) {
+                return BadRequest(result.Errors);
+            }
 
             UserDTO userDto = new UserDTO {
                 Username = user.UserName,
@@ -44,20 +43,17 @@ namespace API.Controllers {
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDto) {
-            AppUser? user = await context.Users
+            AppUser? user = await userManager.Users
                 .Include(user => user.Photos)
-                .FirstOrDefaultAsync(user => user.UserName == loginDto.Username.ToLower());
+                .FirstOrDefaultAsync(user => user.NormalizedUserName == loginDto.Username.ToUpper());
             
-            if(user == null) {
+            if(user == null || user.UserName == null) {
                 return Unauthorized("Invalid Username");
             }
 
-            using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt);
-            byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-            for (int i = 0; i < computedHash.Length; i++) { 
-                if (computedHash[i] != user.PasswordHash[i]) {
-                    return Unauthorized("Invalid Password");
-                }
+            var result = await userManager.CheckPasswordAsync(user, loginDto.Password);
+            if (!result) {
+                return Unauthorized();
             }
                
             UserDTO userDto = new UserDTO {
@@ -72,7 +68,7 @@ namespace API.Controllers {
         }
 
         private async Task<bool> UserExists(string username) {
-            return await context.Users.AnyAsync(user => user.UserName.ToLower() == username.ToLower());
+            return await userManager.Users.AnyAsync(user => user.NormalizedUserName == username.ToUpper());
         }
     }
 }

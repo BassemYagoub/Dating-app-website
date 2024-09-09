@@ -1,6 +1,8 @@
 using API.Data;
+using API.Entities;
 using API.Extensions;
 using API.Middleware;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -10,16 +12,6 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 
 WebApplication app = builder.Build();
-
-if (app.Environment.IsDevelopment()) {
-    app.UseSwagger();
-    app.UseSwaggerUI(options => {
-        options.SwaggerEndpoint("swagger/v1/swagger.json", "API V1");
-        options.RoutePrefix = string.Empty;
-    });
-
-    app.MapOpenApi(); // Configure the HTTP request pipeline.
-}
 
 app.UseHttpsRedirection();
 
@@ -35,8 +27,9 @@ using IServiceScope scope = app.Services.CreateScope();
 IServiceProvider services = scope.ServiceProvider;
 try {
     DataContext context = services.GetRequiredService<DataContext>();
+    UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
     await context.Database.MigrateAsync();
-    await Seed.SeedUsers(context);
+    await Seed.SeedUsers(userManager);
 }
 catch (Exception exception) { 
     ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();

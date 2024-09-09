@@ -13,10 +13,6 @@ namespace API.Extensions {
                 opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
 
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            services.AddOpenApi();
-            services.AddSwaggerGen();
-
             services.AddCors(options => {
                 options.AddPolicy("Cors 4200", builder => {
                     builder.WithOrigins("http://localhost:4200", "https://localhost:4200")

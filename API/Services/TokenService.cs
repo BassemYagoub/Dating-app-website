@@ -15,6 +15,10 @@ namespace API.Services {
             
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey));
 
+            if (user.UserName == null) {
+                throw new Exception("No username for user");
+            }
+
             List<Claim> claims = new List<Claim> {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.UserName)
