@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../_models/user';
@@ -14,6 +14,14 @@ export class AccountService {
 
   baseUrl: string = environment.apiUrl;
   currentUser = signal<User | null>(null);
+  roles = computed(() => {
+    const user = this.currentUser();
+    if(user && user.token){
+      const role = JSON.parse(atob(user.token.split('.')[1])).role;
+      return Array.isArray(role) ? role : [role];
+    }
+    return null;
+  });
 
   login(model : any): Observable<void>{
     return this.http.post<User>(this.baseUrl+"account/login", model).pipe(

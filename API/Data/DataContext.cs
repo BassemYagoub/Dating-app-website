@@ -21,7 +21,7 @@ namespace API.Data {
             builder.Entity<AppRole>()
                 .HasMany(usr => usr.UserRoles)
                 .WithOne(u => u.Role)
-                .HasForeignKey(usr => usr.UserId)
+                .HasForeignKey(usr => usr.RoleId)
                 .IsRequired();
 
             builder.Entity<UserLike>()
