@@ -24,7 +24,7 @@ export class NavComponent {
       next: (response: any) => {
         this.router.navigateByUrl('/members');
       },
-      error: (err: any) => { this.toastr.error(err); }
+      error: (err: any) => { this.toastr.error(err.error); }
     })
   }
 

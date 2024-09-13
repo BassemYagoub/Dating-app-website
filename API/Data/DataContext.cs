@@ -38,7 +38,7 @@ namespace API.Data {
                 .HasOne(s => s.TargetUser)
                 .WithMany(l => l.LikedByUsers)
                 .HasForeignKey(s => s.TargetUserId)
-                .OnDelete(DeleteBehavior.Cascade); //double cascade can be problematic with sqlserver
+                .OnDelete(DeleteBehavior.NoAction); //double cascade can be problematic with sqlserver
 
             builder.Entity<Message>()
                 .HasOne(m => m.Recipient)

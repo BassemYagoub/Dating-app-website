@@ -29,7 +29,7 @@ namespace API.Controllers {
             }
 
             string[] selectedRoles = roles.Split(",").ToArray();
-            AppUser user = await userManager.FindByNameAsync(username);
+            AppUser? user = await userManager.FindByNameAsync(username);
             if (user == null) {
                 return BadRequest("User not found");
             }
@@ -50,7 +50,7 @@ namespace API.Controllers {
 
         [Authorize(Policy = "ModeratePhotoRole")]
         [HttpGet("photos-to-moderate")]
-        public async Task<ActionResult> GetPhotosForModeration() {
+        public ActionResult GetPhotosForModeration() {
             return Ok("Only admins and moderators can see this");
         }
     }
