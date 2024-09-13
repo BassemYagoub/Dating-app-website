@@ -53,7 +53,7 @@ namespace API.Controllers {
 
             var result = await userManager.CheckPasswordAsync(user, loginDto.Password);
             if (!result) {
-                return Unauthorized();
+                return Unauthorized("Invalid Password");
             }
                
             UserDTO userDto = new UserDTO {

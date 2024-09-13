@@ -4,7 +4,6 @@ import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { FormsModule } from '@angular/forms';
 import { MemberCardComponent } from "../members/member-card/member-card.component";
 import { PaginationModule } from 'ngx-bootstrap/pagination';
-import { Member } from '../_models/member';
 
 @Component({
     selector: 'app-lists',

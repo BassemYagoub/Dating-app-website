@@ -5,6 +5,7 @@ import { User } from '../_models/user';
 import { map, Observable } from 'rxjs';
 import { LikesService } from './likes.service';
 import { PresenceService } from './presence.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class AccountService {
   private http: HttpClient = inject(HttpClient);
   private likeService = inject(LikesService);
   private presenceService = inject(PresenceService);
-
+  private router: Router = inject(Router);
   baseUrl: string = environment.apiUrl;
   currentUser = signal<User | null>(null);
   roles = computed(() => {
@@ -24,6 +25,12 @@ export class AccountService {
     }
     return null;
   });
+
+  redirectToMembersIfConnected(): void{
+    if(this.currentUser()){
+      this.router.navigateByUrl('/members');
+    }
+  }
 
   login(model : any): Observable<void>{
     return this.http.post<User>(this.baseUrl+"account/login", model).pipe(
